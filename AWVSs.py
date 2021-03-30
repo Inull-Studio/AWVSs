@@ -1,5 +1,7 @@
 import requests
 import json
+import sys
+import os
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -19,10 +21,11 @@ class AFormat:
 
 
 class AWVSS:
-    def __init__(self, ip: str = '127.0.0.1', port: int = 3443):
+    def __init__(self, ip: str = '127.0.0.1', port: int = 3443, key=open('awvsAPIkey', 'r').read().replace('\n', '')):
         self.pre_url = f'https://{ip}:{port}'
+
         self.header = {
-            'X-Auth': '1986ad8c0a5b3df4d7028d5f3c06e936c403f87f35e1f47ebbee06b3188ee0695', 'Content-Type': 'application/json;charset=UTF-8'}
+            'X-Auth': key, 'Content-Type': 'application/json;charset=UTF-8'}
 
     def getme(self):
         url = self.pre_url+'/api/v1/me'
@@ -79,12 +82,28 @@ class AWVSS:
 
 
 if __name__ == "__main__":
+    InputFile = sys.argv
+    if not os.path.isfile(awvsAPIkey):
+        usrapi_key = input('Pls input ur AWVS API-key:')
+        open('awvsAPIkey', 'w+').write(usrapi_key)
+        os.system('attrib +s +h awvsAPIkey')
+    if InputFile == '':
+        print('Please Input FileName!')
+        exit(1)
+    elif InputFile == "delete":
+        os.system('attrib -s -h awvsAPIkey|del /s /q awvsAPIkey')
+        print('success')
+        exit(0)
+    if not os.path.isfile(InputFile):
+        print('Not This File!')
+        exit(1)
     Scan = AWVSS()
-    # Scan.addtarget('https://www.baidu.com/')
-    # targets = Scan.gettargets()
-    # targets_address = AFormat.targets_to_address(targets)
-    # targets_id = AFormat.targets_to_id(targets)
-    # print(targets_address)
-    # print(targets_id)
-    # Scan.deltarget('a7063428-9dba-49c3-bfbb-8442fd9cf876')
-    # Scan.scan('c4e2f08b-6af3-410b-9951-307d2332576e')
+    for ip in open(InputFile, 'r'):
+        Scan.addtarget(ip.replace('\n', ''))
+        targets = Scan.gettargets()
+        # targets_address = AFormat.targets_to_address(targets)
+        targets_id = AFormat.targets_to_id(targets)
+        # print(targets_address)
+        # print(targets_id)
+        # Scan.deltarget('a7063428-9dba-49c3-bfbb-8442fd9cf876')
+        Scan.scan(targets_id)
