@@ -6,6 +6,22 @@ import os
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+InputFile = sys.argv
+if not os.path.isfile('awvsAPIkey'):
+    usrapi_key = input('Pls input ur AWVS API-key:')
+    open('awvsAPIkey', 'w+').write(usrapi_key)
+    os.system('attrib +s +h awvsAPIkey')
+if InputFile == '':
+    print('Please Input FileName!')
+    exit(1)
+if InputFile == "delete":
+    os.system('attrib -s -h awvsAPIkey|del /s /q awvsAPIkey')
+    print('success')
+    exit(0)
+if not os.path.isfile(InputFile[1]):
+    print('Not This File!')
+    exit(1)
+
 
 class AFormat:
     def __init__(self):
@@ -21,7 +37,7 @@ class AFormat:
 
 
 class AWVSS:
-    def __init__(self, ip: str = '127.0.0.1', port: int = 3443, key=open('awvsAPIkey', 'r').read().replace('\n', '')):
+    def __init__(self, ip: str = '127.0.0.1', port: int = 3443, key=open('awvsAPIkey', 'r').read()):
         self.pre_url = f'https://{ip}:{port}'
 
         self.header = {
@@ -82,23 +98,8 @@ class AWVSS:
 
 
 if __name__ == "__main__":
-    InputFile = sys.argv
-    if not os.path.isfile(awvsAPIkey):
-        usrapi_key = input('Pls input ur AWVS API-key:')
-        open('awvsAPIkey', 'w+').write(usrapi_key)
-        os.system('attrib +s +h awvsAPIkey')
-    if InputFile == '':
-        print('Please Input FileName!')
-        exit(1)
-    elif InputFile == "delete":
-        os.system('attrib -s -h awvsAPIkey|del /s /q awvsAPIkey')
-        print('success')
-        exit(0)
-    if not os.path.isfile(InputFile):
-        print('Not This File!')
-        exit(1)
     Scan = AWVSS()
-    for ip in open(InputFile, 'r'):
+    for ip in open(InputFile[1], 'r'):
         Scan.addtarget(ip.replace('\n', ''))
         targets = Scan.gettargets()
         # targets_address = AFormat.targets_to_address(targets)
